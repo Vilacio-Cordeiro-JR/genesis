@@ -47,16 +47,20 @@ api.interceptors.response.use(
   },
 );
 
-interface ProjectsResponse extends ApiSuccess<Project[]> {}
+const extractProjects = (body: unknown): Project[] => {
+  const list = (body as Partial<ApiSuccess<Project[]>> | null)?.data;
+  if (!Array.isArray(list)) throw new Error('Resposta inesperada da API');
+  return list;
+};
 
 export const projectService = {
   async getProjects(): Promise<Project[]> {
-    const { data } = await api.get<ProjectsResponse>('/public/projects', { silent: true, params: { limit: 50 } });
-    return data.data;
+    const { data } = await api.get<unknown>('/public/projects', { silent: true, params: { limit: 50 } });
+    return extractProjects(data);
   },
   async getPresets(): Promise<Project[]> {
-    const { data } = await api.get<ProjectsResponse>('/public/projects', { silent: true, params: { isPreset: true, limit: 50 } });
-    return data.data;
+    const { data } = await api.get<unknown>('/public/projects', { silent: true, params: { isPreset: true, limit: 50 } });
+    return extractProjects(data);
   },
 };
 
