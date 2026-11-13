@@ -64,12 +64,30 @@ export const ProjectFormModal = ({ project, onClose, onSaved }: ProjectFormModal
 
   const onSubmit = async (event: FormEvent) => {
     event.preventDefault();
+
+    const generatedSlug = slugify(form.slug);
+    if (!generatedSlug || generatedSlug.length < 2) {
+      toast.error('O slug informado é inválido. Digite ao menos 2 caracteres contendo letras ou números.');
+      return;
+    }
+
+    const thumbnailUrl = form.thumbnailUrl.trim();
+    if (!thumbnailUrl.startsWith('/') && !/^https?:\/\//i.test(thumbnailUrl)) {
+      toast.error('A URL da imagem deve iniciar com https://, http:// ou caminho relativo iniciado por /');
+      return;
+    }
+
     const demoUrl = form.demoUrl.trim();
+    if (demoUrl && !/^https?:\/\//i.test(demoUrl)) {
+      toast.error('A URL de demonstração deve iniciar com https:// ou http://');
+      return;
+    }
+
     const payload: ProjectInput = {
       title: form.title.trim(),
-      slug: slugify(form.slug),
+      slug: generatedSlug,
       category: form.category,
-      thumbnailUrl: form.thumbnailUrl.trim(),
+      thumbnailUrl,
       description: form.description.trim(),
       tags: splitTags(form.tags),
       features: splitLines(form.features),

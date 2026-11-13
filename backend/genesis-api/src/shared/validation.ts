@@ -1,6 +1,41 @@
+import { URL } from 'node:url';
 import { z } from 'zod';
 
 export const objectIdSchema = z.string().regex(/^[a-f\d]{24}$/i, 'Identificador inválido');
+
+export const optionalObjectIdSchema = z
+  .string()
+  .trim()
+  .refine((val) => val === '' || /^[a-f\d]{24}$/i.test(val), 'Identificador inválido')
+  .transform((val) => (val === '' ? undefined : val))
+  .optional();
+
+const isHttpUrl = (val: string): boolean => {
+  try {
+    const parsed = new URL(val);
+    return parsed.protocol === 'http:' || parsed.protocol === 'https:';
+  } catch {
+    return false;
+  }
+};
+
+export const safeUrlSchema = z
+  .string()
+  .trim()
+  .max(500)
+  .refine((val) => val === '' || isHttpUrl(val), 'A URL deve iniciar com http:// ou https://')
+  .transform((val) => (val === '' ? undefined : val))
+  .optional();
+
+export const safeImageUrlSchema = z
+  .string()
+  .trim()
+  .min(1, 'Informe a URL da imagem')
+  .max(500)
+  .refine(
+    (val) => val.startsWith('/') || isHttpUrl(val),
+    'A URL da imagem deve iniciar com http://, https:// ou caminho relativo iniciado por /',
+  );
 
 export const idParamsSchema = z.object({ id: objectIdSchema });
 

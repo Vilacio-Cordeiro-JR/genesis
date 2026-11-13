@@ -21,4 +21,8 @@ export class QuoteController {
     const { id } = idParamsSchema.parse(req.params);
     sendOk(res, await this.service.updateStatus(id, updateQuoteStatusSchema.parse(req.body)));
   };
+
+  metrics = async (_req: Request, res: Response): Promise<void> => {
+    sendOk(res, await this.service.getMetrics());
+  };
 }

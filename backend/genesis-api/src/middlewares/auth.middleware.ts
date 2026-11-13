@@ -1,3 +1,4 @@
+import { URL } from 'node:url';
 import type { RequestHandler } from 'express';
 import jwt from 'jsonwebtoken';
 import { AUTH_COOKIE } from '../config/cookie';
@@ -30,8 +31,23 @@ export const authMiddleware: RequestHandler = (req, _res, next) => {
   if (!token) return next(AppError.unauthorized('Acesso negado. Faça login para continuar.'));
 
   if (!bearerToken && UNSAFE_METHODS.has(req.method)) {
-    const origin = req.header('origin');
-    if (origin && !env.CORS_ORIGINS.includes(origin)) return next(AppError.forbidden('Origem não permitida'));
+    if (req.header('sec-fetch-site') === 'cross-site') {
+      return next(AppError.forbidden('Requisição cross-site bloqueada'));
+    }
+
+    let origin = req.header('origin');
+    const referer = req.header('referer');
+    if (!origin && referer) {
+      try {
+        origin = new URL(referer).origin;
+      } catch {
+        origin = undefined;
+      }
+    }
+
+    if (!origin || !env.CORS_ORIGINS.includes(origin)) {
+      return next(AppError.forbidden('Origem não permitida ou cabeçalho Origin ausente'));
+    }
   }
 
   try {

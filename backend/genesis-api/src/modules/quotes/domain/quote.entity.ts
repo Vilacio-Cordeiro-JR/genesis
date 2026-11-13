@@ -24,3 +24,9 @@ export interface QuoteStatusUpdate {
   status: QuoteStatus;
   notes?: string;
 }
+
+export interface QuoteMetrics {
+  total: number;
+  pending: number;
+  contactedThisMonth: number;
+}

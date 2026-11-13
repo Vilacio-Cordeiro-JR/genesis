@@ -15,7 +15,19 @@ export const createApp = (): Express => {
   app.disable('x-powered-by');
   if (isProduction) app.set('trust proxy', 1);
 
-  app.use(helmet());
+  // Esta API só responde JSON (nunca HTML/JS/CSS próprios), então a CSP mais segura
+  // é negar tudo por padrão em vez de confiar nos defaults do helmet pensados para páginas.
+  app.use(
+    helmet({
+      contentSecurityPolicy: {
+        directives: {
+          defaultSrc: ["'none'"],
+          frameAncestors: ["'none'"],
+        },
+      },
+      crossOriginResourcePolicy: { policy: 'same-site' },
+    }),
+  );
   app.use(
     cors({
       origin: env.CORS_ORIGINS.length > 0 ? env.CORS_ORIGINS : false,

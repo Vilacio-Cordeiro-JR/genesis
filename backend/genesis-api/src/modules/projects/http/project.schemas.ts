@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { booleanQuery, paginationQuerySchema } from '../../../shared/validation';
+import { booleanQuery, paginationQuerySchema, safeImageUrlSchema, safeUrlSchema } from '../../../shared/validation';
 import { PROJECT_CATEGORIES } from '../domain/project.entity';
 
 const emptyToUndefined = (value: string | undefined): string | undefined => value || undefined;
@@ -33,10 +33,10 @@ export const createProjectSchema = z
     title: z.string().trim().min(3).max(160),
     category: z.enum(PROJECT_CATEGORIES),
     description: z.string().trim().min(10).max(2000),
-    thumbnailUrl: z.string().trim().min(1).max(500),
+    thumbnailUrl: safeImageUrlSchema,
     tags: z.array(z.string().trim().toLowerCase().min(1).max(40)).max(12).default([]),
     features: z.array(z.string().trim().min(1).max(160)).max(20).default([]),
-    demoUrl: z.string().trim().url().max(500).optional(),
+    demoUrl: safeUrlSchema,
     isPreset: z.boolean().default(false),
     isActive: z.boolean().default(true),
   })

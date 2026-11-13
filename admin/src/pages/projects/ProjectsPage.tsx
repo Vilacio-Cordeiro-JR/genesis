@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { Plus } from 'lucide-react';
 import { useToast } from '../../contexts/ToastContext';
 import { getErrorMessage } from '../../lib/errors';
@@ -15,20 +15,26 @@ export const ProjectsPage = () => {
   const [loading, setLoading] = useState(true);
   const [busyId, setBusyId] = useState<string | null>(null);
   const [editor, setEditor] = useState<EditorState>({ open: false });
+  const mountedRef = useRef(true);
 
   const load = useCallback(async () => {
     setLoading(true);
     try {
-      setProjects(await projectsService.listAll());
+      const data = await projectsService.listAll();
+      if (mountedRef.current) setProjects(data);
     } catch (error) {
-      toast.error(getErrorMessage(error));
+      if (mountedRef.current) toast.error(getErrorMessage(error));
     } finally {
-      setLoading(false);
+      if (mountedRef.current) setLoading(false);
     }
   }, [toast]);
 
   useEffect(() => {
+    mountedRef.current = true;
     void load();
+    return () => {
+      mountedRef.current = false;
+    };
   }, [load]);
 
   const toggleActive = async (project: Project) => {

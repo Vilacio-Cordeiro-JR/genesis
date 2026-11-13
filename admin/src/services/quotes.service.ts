@@ -1,6 +1,5 @@
 import { http } from '../lib/http';
 import type { ApiPage, ApiSuccess, Quote, QuoteStatus } from '../types/api';
-import { fetchAllPages } from './pagination';
 
 export interface QuotesPage {
   items: Quote[];
@@ -24,21 +23,8 @@ export const quotesService = {
   },
 
   async metrics(): Promise<QuoteMetrics> {
-    const monthStart = new Date();
-    monthStart.setDate(1);
-    monthStart.setHours(0, 0, 0, 0);
-
-    const [total, pending, contacted] = await Promise.all([
-      fetchPage(undefined, 1, 1),
-      fetchPage('PENDING', 1, 1),
-      fetchAllPages((page) => fetchPage('CONTACTED', page, 50)),
-    ]);
-
-    return {
-      total: total.meta.total,
-      pending: pending.meta.total,
-      contactedThisMonth: contacted.filter((quote) => new Date(quote.updatedAt) >= monthStart).length,
-    };
+    const { data } = await http.get<ApiSuccess<QuoteMetrics>>('/admin/quotes/metrics');
+    return data.data;
   },
 
   async updateStatus(id: string, status: QuoteStatus, notes: string): Promise<Quote> {

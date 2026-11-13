@@ -1,6 +1,6 @@
 import type { FilterQuery } from 'mongoose';
 import { buildPaginated, type Paginated, type Pagination } from '../../../shared/pagination';
-import type { NewQuote, Quote, QuoteStatusUpdate } from '../domain/quote.entity';
+import type { NewQuote, Quote, QuoteMetrics, QuoteStatusUpdate } from '../domain/quote.entity';
 import type { QuoteFilter, QuoteRepository } from '../domain/quote.repository';
 import { QuoteModel, type QuoteDocument, type QuoteLean } from './quote.model';
 
@@ -48,5 +48,19 @@ export class MongoQuoteRepository implements QuoteRepository {
       { new: true, runValidators: true },
     ).lean<QuoteLean>();
     return doc ? toQuote(doc) : null;
+  }
+
+  async getMetrics(): Promise<QuoteMetrics> {
+    const monthStart = new Date();
+    monthStart.setDate(1);
+    monthStart.setHours(0, 0, 0, 0);
+
+    const [total, pending, contactedThisMonth] = await Promise.all([
+      QuoteModel.countDocuments(),
+      QuoteModel.countDocuments({ status: 'PENDING' }),
+      QuoteModel.countDocuments({ status: 'CONTACTED', updatedAt: { $gte: monthStart } }),
+    ]);
+
+    return { total, pending, contactedThisMonth };
   }
 }

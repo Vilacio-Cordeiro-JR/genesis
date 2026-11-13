@@ -1,7 +1,7 @@
 import { AppError } from '../../../shared/AppError';
 import type { Paginated, Pagination } from '../../../shared/pagination';
 import type { ProjectRepository } from '../../projects/domain/project.repository';
-import type { NewQuote, Quote, QuoteStatusUpdate } from '../domain/quote.entity';
+import type { NewQuote, Quote, QuoteMetrics, QuoteStatusUpdate } from '../domain/quote.entity';
 import type { QuoteFilter, QuoteRepository } from '../domain/quote.repository';
 
 export class QuoteService {
@@ -28,5 +28,9 @@ export class QuoteService {
     const quote = await this.quotes.updateStatus(id, update);
     if (!quote) throw AppError.notFound('Orçamento não encontrado');
     return quote;
+  }
+
+  getMetrics(): Promise<QuoteMetrics> {
+    return this.quotes.getMetrics();
   }
 }

@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { objectIdSchema, paginationQuerySchema, plainText } from '../../../shared/validation';
+import { optionalObjectIdSchema, paginationQuerySchema, plainText } from '../../../shared/validation';
 import { QUOTE_STATUSES } from '../domain/quote.entity';
 
 export const createQuoteSchema = z
@@ -10,7 +10,7 @@ export const createQuoteSchema = z
     howDidYouKnow: plainText(1, 200),
     solutionType: plainText(2, 100),
     projectDescription: plainText(10, 3000),
-    selectedPresetId: objectIdSchema.optional(),
+    selectedPresetId: optionalObjectIdSchema,
   })
   .strict();
 
