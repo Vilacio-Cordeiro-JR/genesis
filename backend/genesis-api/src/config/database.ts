@@ -1,0 +1,9 @@
+import mongoose from 'mongoose';
+import { env } from './env';
+
+export const connectDatabase = async (): Promise<void> => {
+  mongoose.set('strictQuery', true);
+  await mongoose.connect(env.MONGODB_URI, { serverSelectionTimeoutMS: 5000 });
+};
+
+export const disconnectDatabase = (): Promise<void> => mongoose.disconnect();
