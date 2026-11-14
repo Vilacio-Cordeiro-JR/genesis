@@ -1,17 +1,17 @@
 import { env } from './config/env';
 import { ProjectService } from './modules/projects/application/project.service';
-import { MongoProjectRepository } from './modules/projects/infra/project.mongo-repository';
+import { PgProjectRepository } from './modules/projects/infra/project.pg-repository';
 import { ProjectController } from './modules/projects/http/project.controller';
 import { QuoteService } from './modules/quotes/application/quote.service';
-import { MongoQuoteRepository } from './modules/quotes/infra/quote.mongo-repository';
+import { PgQuoteRepository } from './modules/quotes/infra/quote.pg-repository';
 import { QuoteController } from './modules/quotes/http/quote.controller';
 import { AuthService } from './modules/users/application/auth.service';
-import { MongoUserRepository } from './modules/users/infra/user.mongo-repository';
+import { PgUserRepository } from './modules/users/infra/user.pg-repository';
 import { AuthController } from './modules/users/http/auth.controller';
 
-const projectRepository = new MongoProjectRepository();
-const quoteRepository = new MongoQuoteRepository();
-export const userRepository = new MongoUserRepository();
+const projectRepository = new PgProjectRepository();
+const quoteRepository = new PgQuoteRepository();
+export const userRepository = new PgUserRepository();
 
 export const projectController = new ProjectController(new ProjectService(projectRepository));
 export const quoteController = new QuoteController(new QuoteService(quoteRepository, projectRepository));

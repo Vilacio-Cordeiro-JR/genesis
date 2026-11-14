@@ -7,13 +7,13 @@ import jwt from 'jsonwebtoken';
 // Por isso usamos `import()` dinâmico para `app.ts`/`supertest` depois de
 // garantir esses valores, em vez de `import` estático no topo do arquivo.
 process.env.NODE_ENV ??= 'test';
-process.env.MONGODB_URI ??= 'mongodb://localhost:27017/genesis-test';
+process.env.DATABASE_URL ??= 'postgresql://user:pass@localhost:5432/genesis_test';
 process.env.JWT_SECRET ??= 'a'.repeat(40);
 process.env.PUBLIC_API_KEY ??= 'b'.repeat(30);
 process.env.CORS_ORIGINS ??= 'http://localhost:5173';
 
 const TRUSTED_ORIGIN = process.env.CORS_ORIGINS.split(',')[0] ?? '';
-const FAKE_QUOTE_ID = '507f1f77bcf86cd799439011';
+const FAKE_QUOTE_ID = 'f47ac10b-58cc-4372-a567-0e02b2c3d479';
 
 const signAdminToken = (): string =>
   jwt.sign({ role: 'ADMIN' }, process.env.JWT_SECRET as string, {

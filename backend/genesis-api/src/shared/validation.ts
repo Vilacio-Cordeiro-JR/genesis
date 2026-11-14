@@ -1,12 +1,12 @@
 import { URL } from 'node:url';
 import { z } from 'zod';
 
-export const objectIdSchema = z.string().regex(/^[a-f\d]{24}$/i, 'Identificador inválido');
+export const objectIdSchema = z.string().uuid('Identificador inválido');
 
 export const optionalObjectIdSchema = z
   .string()
   .trim()
-  .refine((val) => val === '' || /^[a-f\d]{24}$/i.test(val), 'Identificador inválido')
+  .refine((val) => val === '' || z.string().uuid().safeParse(val).success, 'Identificador inválido')
   .transform((val) => (val === '' ? undefined : val))
   .optional();
 

@@ -34,8 +34,8 @@ describe('Esquemas de validação e sanitização', () => {
       assert.throws(() => safeUrlSchema.parse('javascript:evil()'));
     });
 
-    it('valida ObjectId de 24 caracteres hex', () => {
-      const validId = '507f1f77bcf86cd799439011';
+    it('valida identificador UUID', () => {
+      const validId = 'f47ac10b-58cc-4372-a567-0e02b2c3d479';
       assert.equal(optionalObjectIdSchema.parse(validId), validId);
       assert.throws(() => optionalObjectIdSchema.parse('invalido-123'));
     });

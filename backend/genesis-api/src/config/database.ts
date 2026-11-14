@@ -1,21 +1,27 @@
-import mongoose from 'mongoose';
-import { env } from './env';
+import { Pool } from 'pg';
+import { env, isProduction } from './env';
 
-const describeUri = (uri: string): string => {
-  const match = /^(mongodb(?:\+srv)?:\/\/)([^:@/]*):([^@]*)@(.*)$/.exec(uri);
-  if (!match) return `formato inesperado (começa com: ${JSON.stringify(uri.slice(0, 20))})`;
-  const [, scheme, user, password, rest] = match;
-  return `${scheme}${JSON.stringify(user)}:<senha com ${password?.length} caracteres>@${rest}`;
-};
+// Neon (e a maioria dos provedores de Postgres gerenciado) exige TLS; a string
+// de conexão normalmente já traz `sslmode=require`, mas fixamos aqui também
+// para funcionar mesmo se essa query string for omitida em produção.
+const useSsl = isProduction || /sslmode=require|neon\.tech/.test(env.DATABASE_URL);
+
+export const pool = new Pool({
+  connectionString: env.DATABASE_URL,
+  ssl: useSsl ? { rejectUnauthorized: false } : undefined,
+});
+
+pool.on('error', (error) => {
+  console.error('Erro inesperado no pool do PostgreSQL:', error);
+});
 
 export const connectDatabase = async (): Promise<void> => {
-  mongoose.set('strictQuery', true);
   try {
-    await mongoose.connect(env.MONGODB_URI, { serverSelectionTimeoutMS: 5000 });
+    await pool.query('SELECT 1');
   } catch (error) {
-    console.error('Falha ao conectar. URI vista pela API:', describeUri(env.MONGODB_URI));
+    console.error('Falha ao conectar ao PostgreSQL. Verifique a variável DATABASE_URL.');
     throw error;
   }
 };
 
-export const disconnectDatabase = (): Promise<void> => mongoose.disconnect();
+export const disconnectDatabase = (): Promise<void> => pool.end();
